@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comedor San Vicente - Control Financiero</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#f4f6f8;
+    margin:0;
+    color:#222;
+}
+
+header{
+    background:#0f766e;
+    color:#fff;
+    padding:16px;
+    text-align:center;
+}
+
+.wrap{
+    padding:20px;
+    max-width:1300px;
+    margin:auto;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:16px;
+}
+
+.card{
+    background:#fff;
+    border-radius:16px;
+    padding:16px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+h2{
+    margin-top:0;
+}
+
+input,select,button{
+    width:100%;
+    padding:10px;
+    margin:6px 0;
+    border:1px solid #ccc;
+    border-radius:10px;
+    box-sizing:border-box;
+}
+
+button{
+    background:#0f766e;
+    color:#fff;
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+.btn-danger{
+    background:#dc2626;
+}
+
+.btn-save{
+    background:#2563eb;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    padding:8px;
+    border-bottom:1px solid #eee;
+    text-align:left;
+}
+
+.kpi{
+    font-size:28px;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.small{
+    font-size:12px;
+    color:#666;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>COMEDOR SAN VICENTE</h1>
+    <div>Sistema de Control Financiero</div>
+</header>
+
+<div class="wrap">
+
+    <div class="grid">
+
+        <!-- RESUMEN -->
+        <div class="card">
+            <h2>Resumen General</h2>
+
+            <div>Ingresos Totales</div>
+            <div class="kpi" id="totalIngresos">S/ 0.00</div>
+
+            <div>Egresos Totales</div>
+            <div class="kpi" id="totalEgresos">S/ 0.00</div>
+
+            <div>Deudas Totales</div>
+            <div class="kpi" id="totalDeudas">S/ 0.00</div>
+
+            <div>Balance</div>
+            <div class="kpi" id="balance">S/ 0.00</div>
+        </div>
+
+        <!-- REGISTRO -->
+        <div class="card">
+            <h2>Registrar Movimiento</h2>
+
+            <select id="tipo">
+                <option value="">Seleccione Tipo</option>
+                <option value="ingreso">Ingreso</option>
+                <option value="egreso">Egreso</option>
+                <option value="deuda">Deuda</option>
+            </select>
+
+            <select id="categoria">
+                <option value="">Seleccione Categoría</option>
+                <option value="Refrigerio">Refrigerio</option>
+                <option value="Recreo">Recreo</option>
+                <option value="Almuerzo">Almuerzo</option>
+            </select>
+
+            <input type="text" id="descripcion" placeholder="Descripción">
+
+            <input type="number" id="monto" step="0.01" placeholder="Monto">
+
+            <button class="btn-save" onclick="guardarMovimiento()">
+                Guardar Datos
+            </button>
+
+            <button class="btn-danger" onclick="borrarDatos()">
+                Borrar Todos los Datos
+            </button>
+        </div>
+
+    </div>
+
+    <!-- TABLA -->
+    <div class="card" style="margin-top:20px;">
+        <h2>Movimientos Registrados</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tipo</th>
+                    <th>Categoría</th>
+                    <th>Descripción</th>
+                    <th>Monto</th>
+                </tr>
+            </thead>
+
+            <tbody id="tablaMovimientos"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+
+const db = JSON.parse(localStorage.getItem('comedor_finanzas')) || {
+    movimientos:[]
+};
+
+function save(){
+    localStorage.setItem('comedor_finanzas', JSON.stringify(db));
+    render();
+}
+
+function hoy(){
+    return new Date().toLocaleDateString();
+}
+
+function guardarMovimiento(){
+
+    const tipo = document.getElementById('tipo').value;
+    const categoria = document.getElementById('categoria').value;
+    const descripcion = document.getElementById('descripcion').value;
+    const monto = parseFloat(document.getElementById('monto').value);
+
+    if(!tipo || !categoria || !descripcion || !monto){
+        alert("Complete todos los campos");
+        return;
+    }
+
+    db.movimientos.unshift({
+        fecha:hoy(),
+        tipo,
+        categoria,
+        descripcion,
+        monto
+    });
+
+    save();
+
+    document.getElementById('tipo').value='';
+    document.getElementById('categoria').value='';
+    document.getElementById('descripcion').value='';
+    document.getElementById('monto').value='';
+}
+
+function borrarDatos(){
+
+    if(confirm("¿Desea eliminar todos los datos?")){
+
+        db.movimientos = [];
+
+        save();
+    }
+}
+
+function render(){
+
+    let ingresos = 0;
+    let egresos = 0;
+    let deudas = 0;
+
+    db.movimientos.forEach(m => {
+
+        if(m.tipo === 'ingreso'){
+            ingresos += m.monto;
+        }
+
+        if(m.tipo === 'egreso'){
+            egresos += m.monto;
+        }
+
+        if(m.tipo === 'deuda'){
+            deudas += m.monto;
+        }
+    });
+
+    document.getElementById('totalIngresos').textContent =
+        'S/ ' + ingresos.toFixed(2);
+
+    document.getElementById('totalEgresos').textContent =
+        'S/ ' + egresos.toFixed(2);
+
+    document.getElementById('totalDeudas').textContent =
+        'S/ ' + deudas.toFixed(2);
+
+    document.getElementById('balance').textContent =
+        'S/ ' + (ingresos - egresos - deudas).toFixed(2);
+
+    document.getElementById('tablaMovimientos').innerHTML =
+        db.movimientos.map(m => `
+            <tr>
+                <td>${m.fecha}</td>
+                <td>${m.tipo}</td>
+                <td>${m.categoria}</td>
+                <td>${m.descripcion}</td>
+                <td>S/ ${m.monto.toFixed(2)}</td>
+            </tr>
+        `).join('');
+}
+
+render();
+
+</script>
+
+</body>
+</html>

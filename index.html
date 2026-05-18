@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Comedor San Vicente - Control Financiero</title>
 
 <style>
+
 body{
     font-family:Arial,sans-serif;
     background:#f4f6f8;
@@ -28,7 +30,7 @@ header{
 
 .grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
     gap:16px;
 }
 
@@ -41,15 +43,19 @@ header{
 
 h2{
     margin-top:0;
+    color:#0f766e;
 }
 
-input,select,button{
+input,
+select,
+button{
     width:100%;
-    padding:10px;
+    padding:12px;
     margin:6px 0;
     border:1px solid #ccc;
     border-radius:10px;
     box-sizing:border-box;
+    font-size:14px;
 }
 
 button{
@@ -58,10 +64,12 @@ button{
     border:none;
     cursor:pointer;
     font-weight:bold;
+    transition:.3s;
 }
 
 button:hover{
     opacity:.9;
+    transform:scale(1.01);
 }
 
 .btn-danger{
@@ -77,8 +85,13 @@ table{
     border-collapse:collapse;
 }
 
+th{
+    background:#0f766e;
+    color:white;
+}
+
 th,td{
-    padding:8px;
+    padding:10px;
     border-bottom:1px solid #eee;
     text-align:left;
 }
@@ -89,10 +102,33 @@ th,td{
     margin-bottom:10px;
 }
 
+.ingreso{
+    color:#15803d;
+    font-weight:bold;
+}
+
+.egreso{
+    color:#dc2626;
+    font-weight:bold;
+}
+
+.deuda{
+    color:#b45309;
+    font-weight:bold;
+}
+
 .small{
     font-size:12px;
     color:#666;
 }
+
+.footer{
+    text-align:center;
+    padding:15px;
+    color:#666;
+    font-size:13px;
+}
+
 </style>
 </head>
 
@@ -109,60 +145,133 @@ th,td{
 
         <!-- RESUMEN -->
         <div class="card">
+
             <h2>Resumen General</h2>
 
             <div>Ingresos Totales</div>
-            <div class="kpi" id="totalIngresos">S/ 0.00</div>
+            <div class="kpi ingreso" id="totalIngresos">
+                S/ 0.00
+            </div>
 
             <div>Egresos Totales</div>
-            <div class="kpi" id="totalEgresos">S/ 0.00</div>
+            <div class="kpi egreso" id="totalEgresos">
+                S/ 0.00
+            </div>
 
             <div>Deudas Totales</div>
-            <div class="kpi" id="totalDeudas">S/ 0.00</div>
+            <div class="kpi deuda" id="totalDeudas">
+                S/ 0.00
+            </div>
 
-            <div>Balance</div>
-            <div class="kpi" id="balance">S/ 0.00</div>
+            <div>Balance General</div>
+            <div class="kpi" id="balance">
+                S/ 0.00
+            </div>
+
         </div>
 
         <!-- REGISTRO -->
         <div class="card">
+
             <h2>Registrar Movimiento</h2>
 
+            <!-- TIPO -->
             <select id="tipo">
-                <option value="">Seleccione Tipo</option>
-                <option value="ingreso">Ingreso</option>
-                <option value="egreso">Egreso</option>
-                <option value="deuda">Deuda</option>
+
+                <option value="">
+                    Seleccione Tipo
+                </option>
+
+                <option value="ingreso">
+                    Ingreso
+                </option>
+
+                <option value="egreso">
+                    Egreso
+                </option>
+
+                <option value="deuda">
+                    Deuda
+                </option>
+
             </select>
 
+            <!-- CATEGORÍA -->
             <select id="categoria">
-                <option value="">Seleccione Categoría</option>
-                <option value="Refrigerio">Refrigerio</option>
-                <option value="Recreo">Recreo</option>
-                <option value="Almuerzo">Almuerzo</option>
+
+                <option value="">
+                    Seleccione Categoría
+                </option>
+
+                <optgroup label="Ingresos">
+
+                    <option value="Ingreso Compras Mercado">
+                        Ingreso por Compras de Mercado
+                    </option>
+
+                </optgroup>
+
+                <optgroup label="Servicios">
+
+                    <option value="Refrigerio">
+                        Refrigerio
+                    </option>
+
+                    <option value="Recreo">
+                        Recreo
+                    </option>
+
+                    <option value="Almuerzo">
+                        Almuerzo
+                    </option>
+
+                </optgroup>
+
             </select>
 
-            <input type="text" id="descripcion" placeholder="Descripción">
+            <!-- DESCRIPCIÓN -->
+            <input
+                type="text"
+                id="descripcion"
+                placeholder="Descripción del movimiento"
+            >
 
-            <input type="number" id="monto" step="0.01" placeholder="Monto">
+            <!-- MONTO -->
+            <input
+                type="number"
+                id="monto"
+                step="0.01"
+                placeholder="Monto"
+            >
 
-            <button class="btn-save" onclick="guardarMovimiento()">
+            <!-- BOTONES -->
+            <button
+                class="btn-save"
+                onclick="guardarMovimiento()"
+            >
                 Guardar Datos
             </button>
 
-            <button class="btn-danger" onclick="borrarDatos()">
+            <button
+                class="btn-danger"
+                onclick="borrarDatos()"
+            >
                 Borrar Todos los Datos
             </button>
+
         </div>
 
     </div>
 
     <!-- TABLA -->
     <div class="card" style="margin-top:20px;">
+
         <h2>Movimientos Registrados</h2>
 
         <table>
+
             <thead>
+
                 <tr>
                     <th>Fecha</th>
                     <th>Tipo</th>
@@ -170,66 +279,157 @@ th,td{
                     <th>Descripción</th>
                     <th>Monto</th>
                 </tr>
+
             </thead>
 
             <tbody id="tablaMovimientos"></tbody>
+
         </table>
+
     </div>
 
 </div>
 
+<div class="footer">
+    Sistema Financiero - Comedor San Vicente
+</div>
+
 <script>
 
-const db = JSON.parse(localStorage.getItem('comedor_finanzas')) || {
+/* =========================
+   BASE LOCAL
+========================= */
+
+const db = JSON.parse(
+    localStorage.getItem('comedor_finanzas')
+) || {
     movimientos:[]
 };
 
+/* =========================
+   GUARDAR LOCALSTORAGE
+========================= */
+
 function save(){
-    localStorage.setItem('comedor_finanzas', JSON.stringify(db));
+
+    localStorage.setItem(
+        'comedor_finanzas',
+        JSON.stringify(db)
+    );
+
     render();
 }
 
+/* =========================
+   FECHA
+========================= */
+
 function hoy(){
+
     return new Date().toLocaleDateString();
 }
 
+/* =========================
+   AUTOSELECCIÓN
+========================= */
+
+document.getElementById('categoria')
+.addEventListener('change', function(){
+
+    const categoria = this.value;
+
+    if(categoria === 'Ingreso Compras Mercado'){
+
+        document.getElementById('tipo').value =
+            'ingreso';
+    }
+});
+
+/* =========================
+   GUARDAR MOVIMIENTO
+========================= */
+
 function guardarMovimiento(){
 
-    const tipo = document.getElementById('tipo').value;
-    const categoria = document.getElementById('categoria').value;
-    const descripcion = document.getElementById('descripcion').value;
-    const monto = parseFloat(document.getElementById('monto').value);
+    const tipo =
+        document.getElementById('tipo').value;
 
-    if(!tipo || !categoria || !descripcion || !monto){
+    const categoria =
+        document.getElementById('categoria').value;
+
+    const descripcion =
+        document.getElementById('descripcion').value;
+
+    const monto =
+        parseFloat(
+            document.getElementById('monto').value
+        );
+
+    if(
+        !tipo ||
+        !categoria ||
+        !descripcion ||
+        !monto
+    ){
+
         alert("Complete todos los campos");
+
         return;
     }
 
     db.movimientos.unshift({
+
         fecha:hoy(),
         tipo,
         categoria,
         descripcion,
         monto
+
     });
 
     save();
 
+    limpiarFormulario();
+
+    alert("Movimiento registrado correctamente");
+}
+
+/* =========================
+   LIMPIAR FORMULARIO
+========================= */
+
+function limpiarFormulario(){
+
     document.getElementById('tipo').value='';
+
     document.getElementById('categoria').value='';
+
     document.getElementById('descripcion').value='';
+
     document.getElementById('monto').value='';
 }
 
+/* =========================
+   BORRAR DATOS
+========================= */
+
 function borrarDatos(){
 
-    if(confirm("¿Desea eliminar todos los datos?")){
+    if(
+        confirm(
+            "¿Desea eliminar todos los datos?"
+        )
+    ){
 
         db.movimientos = [];
 
         save();
     }
 }
+
+/* =========================
+   RENDER
+========================= */
 
 function render(){
 
@@ -240,41 +440,77 @@ function render(){
     db.movimientos.forEach(m => {
 
         if(m.tipo === 'ingreso'){
+
             ingresos += m.monto;
         }
 
         if(m.tipo === 'egreso'){
+
             egresos += m.monto;
         }
 
         if(m.tipo === 'deuda'){
+
             deudas += m.monto;
         }
     });
 
-    document.getElementById('totalIngresos').textContent =
+    document.getElementById(
+        'totalIngresos'
+    ).textContent =
         'S/ ' + ingresos.toFixed(2);
 
-    document.getElementById('totalEgresos').textContent =
+    document.getElementById(
+        'totalEgresos'
+    ).textContent =
         'S/ ' + egresos.toFixed(2);
 
-    document.getElementById('totalDeudas').textContent =
+    document.getElementById(
+        'totalDeudas'
+    ).textContent =
         'S/ ' + deudas.toFixed(2);
 
-    document.getElementById('balance').textContent =
-        'S/ ' + (ingresos - egresos - deudas).toFixed(2);
+    document.getElementById(
+        'balance'
+    ).textContent =
+        'S/ ' +
+        (ingresos - egresos - deudas)
+        .toFixed(2);
 
-    document.getElementById('tablaMovimientos').innerHTML =
+    document.getElementById(
+        'tablaMovimientos'
+    ).innerHTML =
+
         db.movimientos.map(m => `
+
             <tr>
+
                 <td>${m.fecha}</td>
-                <td>${m.tipo}</td>
-                <td>${m.categoria}</td>
-                <td>${m.descripcion}</td>
-                <td>S/ ${m.monto.toFixed(2)}</td>
+
+                <td>
+                    ${m.tipo.toUpperCase()}
+                </td>
+
+                <td>
+                    ${m.categoria}
+                </td>
+
+                <td>
+                    ${m.descripcion}
+                </td>
+
+                <td>
+                    S/ ${m.monto.toFixed(2)}
+                </td>
+
             </tr>
+
         `).join('');
 }
+
+/* =========================
+   INICIO
+========================= */
 
 render();
 

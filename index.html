@@ -295,6 +295,118 @@ th{
     }
 }
 
+
+/* ===== MÓDULO FINANCIERO ===== */
+.financial-actions{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+.btn-financial{
+    background:linear-gradient(135deg,#7c3aed,#5b21b6);
+    color:white;
+    padding:12px 18px;
+    border-radius:8px;
+}
+.financial-cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:15px;
+    margin:15px 0 20px;
+}
+.financial-card{
+    background:white;
+    border-radius:10px;
+    padding:18px;
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+    border-left:5px solid #7c3aed;
+}
+.financial-card h3{
+    color:var(--gray);
+    font-size:13px;
+    margin-bottom:8px;
+}
+.financial-card strong{
+    font-size:24px;
+}
+.financial-card.income{border-left-color:#16a34a}
+.financial-card.expense{border-left-color:#dc2626}
+.financial-card.purchase{border-left-color:#d97706}
+.financial-card.balance{border-left-color:#2563eb}
+.modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(15,23,42,.65);
+    z-index:9999;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+.modal-overlay.active{display:flex}
+.modal{
+    background:white;
+    width:min(650px,100%);
+    max-height:90vh;
+    overflow:auto;
+    border-radius:14px;
+    padding:25px;
+    box-shadow:0 20px 50px rgba(0,0,0,.25);
+}
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    margin-bottom:20px;
+}
+.modal-close{
+    background:#e5e7eb;
+    color:#111827;
+    font-size:20px;
+    padding:5px 10px;
+}
+.modal-actions{
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+    margin-top:20px;
+}
+.tipo-movimiento{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:15px;
+}
+.tipo-movimiento label{
+    border:1px solid #d1d5db;
+    padding:12px;
+    border-radius:8px;
+    cursor:pointer;
+    text-align:center;
+    font-weight:bold;
+}
+.tipo-movimiento input{display:none}
+.tipo-movimiento label:has(input:checked){
+    border-color:#2563eb;
+    background:#eff6ff;
+    color:#1d4ed8;
+}
+.movimiento-egreso{
+    color:#dc2626;
+    font-weight:bold;
+}
+.movimiento-compra{
+    color:#d97706;
+    font-weight:bold;
+}
+.movimiento-ingreso{
+    color:#16a34a;
+    font-weight:bold;
+}
+
 </style>
 </head>
 
@@ -371,6 +483,57 @@ th{
                     <strong id="ventasTotales">S/ 0.00</strong>
                 </div>
 
+            </div>
+
+
+            <div class="panel">
+                <div class="financial-actions">
+                    <div>
+                        <h2>💼 Control de caja</h2>
+                        <p style="color:var(--gray);margin-top:5px;">
+                            Registra egresos y compras desde aquí.
+                        </p>
+                    </div>
+                    <button class="btn-financial" onclick="abrirMovimiento()">
+                        ➕ Agregar egreso / compra
+                    </button>
+                </div>
+
+                <div class="financial-cards">
+                    <div class="financial-card income">
+                        <h3>💰 Ventas de hoy</h3>
+                        <strong id="finVentasHoy">S/ 0.00</strong>
+                    </div>
+                    <div class="financial-card expense">
+                        <h3>📉 Egresos de hoy</h3>
+                        <strong id="finEgresosHoy">S/ 0.00</strong>
+                    </div>
+                    <div class="financial-card purchase">
+                        <h3>🛒 Compras de hoy</h3>
+                        <strong id="finComprasHoy">S/ 0.00</strong>
+                    </div>
+                    <div class="financial-card balance">
+                        <h3>💵 Saldo de hoy</h3>
+                        <strong id="finSaldoHoy">S/ 0.00</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>📋 Egresos y compras recientes</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Concepto</th>
+                            <th>Proveedor</th>
+                            <th>Monto</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaMovimientos"></tbody>
+                </table>
             </div>
 
             <div class="panel">
@@ -717,6 +880,53 @@ th{
 </div>
 
 
+
+    <!-- MODAL: AGREGAR EGRESO / COMPRA -->
+    <div id="modalMovimiento" class="modal-overlay" onclick="cerrarMovimientoDesdeFondo(event)">
+        <div class="modal">
+            <div class="modal-header">
+                <div>
+                    <h2>➕ Registrar movimiento</h2>
+                    <p style="color:var(--gray);margin-top:5px;">
+                        Registra el dinero utilizado para egresos o compras.
+                    </p>
+                </div>
+                <button class="modal-close" onclick="cerrarMovimiento()">×</button>
+            </div>
+
+            <div class="tipo-movimiento">
+                <label>
+                    <input type="radio" name="tipoMovimiento" value="egreso" checked>
+                    📉 Egreso
+                </label>
+                <label>
+                    <input type="radio" name="tipoMovimiento" value="compra">
+                    🛒 Compra
+                </label>
+            </div>
+
+            <div class="form-grid">
+                <input id="movConcepto" type="text" placeholder="Concepto / detalle">
+                <input id="movProveedor" type="text" placeholder="Proveedor (opcional)">
+                <input id="movMonto" type="number" min="0" step="0.01" placeholder="Monto S/">
+                <select id="movMetodo">
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Yape">Yape</option>
+                    <option value="Plin">Plin</option>
+                    <option value="Tarjeta">Tarjeta</option>
+                    <option value="Transferencia">Transferencia</option>
+                </select>
+                <input id="movFecha" type="date">
+                <input id="movObservacion" type="text" placeholder="Observación (opcional)">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-gray" onclick="cerrarMovimiento()">Cancelar</button>
+                <button class="btn-success" onclick="guardarMovimiento()">💾 Guardar movimiento</button>
+            </div>
+        </div>
+    </div>
+
 <script>
 
 let productos = JSON.parse(
@@ -796,6 +1006,11 @@ let pedidos = JSON.parse(
 
 let pedidoActual = [];
 
+let movimientos = JSON.parse(
+    localStorage.getItem("movimientos")
+) || [];
+
+
 
 function guardarDatos(){
 
@@ -807,6 +1022,11 @@ function guardarDatos(){
     localStorage.setItem(
         "pedidos",
         JSON.stringify(pedidos)
+    );
+
+    localStorage.setItem(
+        "movimientos",
+        JSON.stringify(movimientos)
     );
 
 }
@@ -1828,9 +2048,189 @@ function actualizarDashboard(){
 }
 
 
+
+function abrirMovimiento(){
+    document.getElementById("modalMovimiento").classList.add("active");
+    document.getElementById("movFecha").value =
+        new Date().toISOString().split("T")[0];
+    document.getElementById("movConcepto").focus();
+}
+
+function cerrarMovimiento(){
+    document.getElementById("modalMovimiento").classList.remove("active");
+    limpiarFormularioMovimiento();
+}
+
+function cerrarMovimientoDesdeFondo(event){
+    if(event.target.id === "modalMovimiento"){
+        cerrarMovimiento();
+    }
+}
+
+function limpiarFormularioMovimiento(){
+    document.getElementById("movConcepto").value = "";
+    document.getElementById("movProveedor").value = "";
+    document.getElementById("movMonto").value = "";
+    document.getElementById("movObservacion").value = "";
+    document.getElementById("movMetodo").value = "Efectivo";
+}
+
+function obtenerTipoMovimiento(){
+    const seleccionado = document.querySelector(
+        'input[name="tipoMovimiento"]:checked'
+    );
+    return seleccionado ? seleccionado.value : "egreso";
+}
+
+function guardarMovimiento(){
+    const tipo = obtenerTipoMovimiento();
+    const concepto = document.getElementById("movConcepto").value.trim();
+    const proveedor = document.getElementById("movProveedor").value.trim();
+    const monto = parseFloat(document.getElementById("movMonto").value);
+    const metodo = document.getElementById("movMetodo").value;
+    const fechaInput = document.getElementById("movFecha").value;
+    const observacion = document.getElementById("movObservacion").value.trim();
+
+    if(!concepto || isNaN(monto) || monto <= 0 || !fechaInput){
+        alert("Complete concepto, monto y fecha correctamente.");
+        return;
+    }
+
+    movimientos.push({
+        id: Date.now(),
+        tipo,
+        concepto,
+        proveedor: proveedor || "—",
+        monto,
+        metodo,
+        fecha: new Date(fechaInput + "T12:00:00").toISOString(),
+        observacion
+    });
+
+    guardarDatos();
+    cerrarMovimiento();
+    actualizarTodo();
+
+    alert(
+        tipo === "compra"
+        ? "Compra registrada correctamente."
+        : "Egreso registrado correctamente."
+    );
+}
+
+function eliminarMovimiento(id){
+    if(!confirm("¿Eliminar este movimiento?")){
+        return;
+    }
+
+    movimientos = movimientos.filter(m => m.id !== id);
+    guardarDatos();
+    actualizarTodo();
+}
+
+function esMismoDia(fechaA, fechaB = new Date()){
+    return new Date(fechaA).toDateString() === fechaB.toDateString();
+}
+
+function obtenerResumenFinanciero(){
+    const hoy = new Date();
+
+    const ventasHoy = pedidos
+        .filter(p => esMismoDia(p.fecha, hoy))
+        .reduce((sum,p) => sum + Number(p.total || 0), 0);
+
+    const egresosHoy = movimientos
+        .filter(m => m.tipo === "egreso" && esMismoDia(m.fecha, hoy))
+        .reduce((sum,m) => sum + Number(m.monto || 0), 0);
+
+    const comprasHoy = movimientos
+        .filter(m => m.tipo === "compra" && esMismoDia(m.fecha, hoy))
+        .reduce((sum,m) => sum + Number(m.monto || 0), 0);
+
+    return {
+        ventasHoy,
+        egresosHoy,
+        comprasHoy,
+        saldoHoy: ventasHoy - egresosHoy - comprasHoy
+    };
+}
+
+function mostrarMovimientos(){
+    const tabla = document.getElementById("tablaMovimientos");
+    if(!tabla) return;
+
+    tabla.innerHTML = "";
+
+    movimientos
+        .slice()
+        .sort((a,b) => new Date(b.fecha) - new Date(a.fecha))
+        .slice(0,10)
+        .forEach(m => {
+            const clase =
+                m.tipo === "compra"
+                ? "movimiento-compra"
+                : "movimiento-egreso";
+
+            const textoTipo =
+                m.tipo === "compra"
+                ? "🛒 Compra"
+                : "📉 Egreso";
+
+            tabla.innerHTML += `
+                <tr>
+                    <td>${new Date(m.fecha).toLocaleDateString("es-PE")}</td>
+                    <td class="${clase}">${textoTipo}</td>
+                    <td>
+                        <strong>${m.concepto}</strong>
+                        ${m.observacion ? `<br><small>${m.observacion}</small>` : ""}
+                    </td>
+                    <td>${m.proveedor}</td>
+                    <td>S/ ${Number(m.monto).toFixed(2)}</td>
+                    <td>
+                        <button
+                            class="btn-danger"
+                            onclick="eliminarMovimiento(${m.id})">
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+    if(movimientos.length === 0){
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align:center;color:#6b7280;">
+                    No hay egresos ni compras registrados.
+                </td>
+            </tr>
+        `;
+    }
+}
+
+function actualizarFinanzasDashboard(){
+    const resumen = obtenerResumenFinanciero();
+
+    document.getElementById("finVentasHoy").textContent =
+        `S/ ${resumen.ventasHoy.toFixed(2)}`;
+
+    document.getElementById("finEgresosHoy").textContent =
+        `S/ ${resumen.egresosHoy.toFixed(2)}`;
+
+    document.getElementById("finComprasHoy").textContent =
+        `S/ ${resumen.comprasHoy.toFixed(2)}`;
+
+    document.getElementById("finSaldoHoy").textContent =
+        `S/ ${resumen.saldoHoy.toFixed(2)}`;
+
+    mostrarMovimientos();
+}
+
 function actualizarTodo(){
 
     actualizarDashboard();
+
+    actualizarFinanzasDashboard();
 
     mostrarTablaProductos();
 
@@ -1864,4 +2264,3 @@ actualizarTodo();
 </body>
 
 </html>
-
